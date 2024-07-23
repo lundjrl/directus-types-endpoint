@@ -1,35 +1,39 @@
 {
-    "name": "types",
-    "description": "Endpoint to generate schema types for TS development.",
-    "icon": "extension",
-    "version": "1.0.0",
-    "keywords": [
-        "directus",
-        "directus-extension",
-        "directus-extension-endpoint"
-    ],
-    "type": "module",
-    "files": [
-        "dist"
-    ],
-    "directus:extension": {
-        "type": "endpoint",
-        "path": "index.js",
-        "source": "src/index.ts",
-        "host": "^10.10.0"
-    },
-    "scripts": {
-        "build": "directus-extension build",
-        "dev": "directus-extension build -w --no-minify",
-        "link": "directus-extension link"
-    },
-    "devDependencies": {
-        "@directus/extensions-sdk": "11.0.7",
-        "@types/node": "^20.14.7",
-        "@types/pluralize": "^0.0.33",
-        "typescript": "^5.5.2"
-    },
-    "dependencies": {
-        "pluralize": "^8.0.0"
-    }
+  "name": "types",
+  "description": "Endpoint to generate schema types for TS development.",
+  "icon": "text_fields",
+  "license": "MIT",
+  "author": {
+    "name": "lundjrl"
+  },
+  "version": "1.0.0",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-extension-endpoint"
+  ],
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "index.js",
+    "source": "src/index.ts",
+    "host": "^10.10.0"
+  },
+  "scripts": {
+    "build": "directus-extension build",
+    "dev": "directus-extension build -w --no-minify",
+    "link": "directus-extension link"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "11.0.7",
+    "@types/node": "^20.14.7",
+    "@types/pluralize": "^0.0.33",
+    "typescript": "^5.5.2"
+  },
+  "dependencies": {
+    "pluralize": "^8.0.0"
+  }
 }
