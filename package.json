@@ -1,5 +1,5 @@
 {
-  "name": "types",
+  "name": "directus-extension-types",
   "description": "Endpoint to generate schema types for TS development.",
   "icon": "text_fields",
   "license": "MIT",
@@ -35,5 +35,9 @@
   },
   "dependencies": {
     "pluralize": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lundjrl/directus-types-endpoint.git"
   }
 }
