@@ -11,6 +11,10 @@ It is specifically designed to be passed as the "SCHEMA" interface in the Direct
 > This work was greatly inspired from [maltejur's generate types extension](https://www.npmjs.com/package/directus-extension-generate-types),
 > however our team needed something that would expose an endpoint and work with newer versions of Directus. We sincerely hope you find it useful ☺️
 
+> [!WARNING]  
+> It is not recommended to expose your database schema in production. We use this tool to generate a types file and commit it to git.
+> We recommend you do the same.
+
 ## Requirements
 
 This extensions only works with Directus 10 and higher.
