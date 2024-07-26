@@ -1,9 +1,10 @@
 import { toPascalCase } from '../utils/toPascalCase';
 import { toSingular } from '../utils/toSingular';
 import { getTabSpaceCount } from '../utils/getTabSpaceCount';
-import { maybeAddTrailingSlash } from '../utils/maybeAddTrailingSlash';
+import { maybeAddTrailingSemicolon } from '../utils/maybeAddTrailingSemicolon';
 
 import type { EndpointExtensionContext } from '@directus/extensions';
+import type { Field, FieldOverview } from '@directus/types';
 
 type GetSchema = EndpointExtensionContext['getSchema'];
 type SCHEMA = Awaited<ReturnType<GetSchema>>;
@@ -18,8 +19,15 @@ type COLLECTION = {
     sortField: S[keyof S]['sortField'];
     note: S[keyof S]['note'];
     accountability: S[keyof S]['accountability'];
-    fields: S[keyof S]['fields'];
-    prevFields: S[keyof S]['fields'];
+    fields: {
+        [name: string]: FieldOverview & {
+            schema: Field['schema'];
+            meta: Field['meta'];
+        };
+    };
+    s: S[keyof S]['fields'];
+    system?: boolean;
+    hasCustomFields: boolean;
 };
 
 export type GenerateTypesOptions = {
@@ -32,14 +40,10 @@ const directusTypes = new Set();
 directusTypes.add('PrimaryKey');
 
 const getCollections = (schema: SCHEMA, logger: Logger) => {
-    if (!schema || typeof schema !== 'object') return [];
-    if (!schema['relations']) return [];
+    if (!schema || typeof schema !== 'object') return {};
+    if (!schema['relations']) return {};
 
-    const allCollections = Object.keys(schema.collections) ?? [];
-
-    const x = allCollections.filter((el) => !el.includes('directus')) ?? [];
-
-    const collections = (x
+    const collections = ((Object.keys(schema.collections) ?? {})
         .map((key) => schema.collections[key])
         .filter((el) => !!el) ?? []) as unknown as COLLECTION[];
 
@@ -52,10 +56,9 @@ const maybeTrimDirectusCollection = (collectionName: string) => {
             8,
             collectionName.length,
         );
-        directusTypes.add(directusCollectionName);
+        directusTypes.add(`${directusCollectionName} as ${collectionName}`);
         return directusCollectionName;
     }
-
     return collectionName;
 };
 
@@ -181,17 +184,42 @@ const getRelations = (
 };
 
 export const generateTypes = async (
-    getSchema: GetSchema,
-    logger: Logger,
+    { getSchema, logger, services }: EndpointExtensionContext,
     options: GenerateTypesOptions,
 ) => {
     if (!getSchema || typeof getSchema !== 'function') {
         return [];
     }
-
     const schema = await getSchema();
 
+    const fieldsService = new services.FieldsService({
+        schema,
+    });
+
     const collections = getCollections(schema, logger);
+
+    const fields = await fieldsService.readAll();
+    fields.forEach((field) => {
+        const collectionName = field.collection;
+        const fieldName = field.field;
+        if (
+            collections[collectionName] &&
+            collections[collectionName].fields &&
+            collections[collectionName].fields[fieldName]
+        ) {
+            if (
+                collectionName.includes('directus') &&
+                field.meta?.system === true
+            ) {
+                collections[collectionName].system = field.meta?.system;
+            }
+            if (!field.meta?.system) {
+                collections[collectionName].hasCustomFields = true;
+            }
+            collections[collectionName].fields[fieldName].schema = field.schema;
+            collections[collectionName].fields[fieldName].meta = field.meta;
+        }
+    });
 
     let ret = '';
     const types: string[] = [];
@@ -207,24 +235,62 @@ export const generateTypes = async (
             return 0;
         })
         .forEach((collection) => {
+            if (collection.system === true && !collection.hasCustomFields) {
+                return;
+            }
+
             const collectionName = toSingular(collection.collection);
-
             const typeName = toPascalCase(collectionName);
-
             const isSingleton = collection?.singleton === true;
-            types.push(
-                `${collectionName}: ${typeName}${isSingleton ? '' : '[]'}`,
-            );
 
-            ret += `export type ${typeName} = {\n`;
+            if (collection.system === true) {
+                const customDirectusCollectionName = `${collectionName.substring(
+                    'directus_'.length,
+                )}`;
+                const customDirectusTypeName = `${typeName.substring(
+                    'Directus'.length,
+                )}`;
+                types.push(
+                    maybeAddTrailingSemicolon(
+                        `${customDirectusCollectionName}: ${customDirectusTypeName}${
+                            isSingleton ? '' : '[]'
+                        }`,
+                        options.trailingSemicolons,
+                    ),
+                );
+                ret += `export type ${customDirectusTypeName} = ${typeName} & {\n`;
+
+                Object.values(collection.fields).forEach((field) => {
+                    if (field.meta?.system) {
+                        if (collection.fields[field.field]) {
+                            delete collection.fields[field.field];
+                        }
+                        if (collection.prevFields[field.field]) {
+                            delete collection.prevFields[field.field];
+                        }
+                        if (collection.relations[field.field]) {
+                            delete collection.relations[field.field];
+                        }
+                    }
+                });
+            } else {
+                types.push(
+                    maybeAddTrailingSemicolon(
+                        `${collectionName}: ${typeName}${
+                            isSingleton ? '' : '[]'
+                        }`,
+                        options.trailingSemicolons,
+                    ),
+                );
+                ret += `export type ${typeName} = {\n`;
+            }
 
             // Remove fields that have an association with another table.
-            collection.relations
-                .map((x) => x.field)
-                .forEach((field) => {
-                    if (collection.prevFields[field])
-                        delete collection.prevFields[field];
-                });
+            collection.relations.forEach((relation, i) => {
+                if (collection.prevFields[relation.field])
+                    delete collection.prevFields[relation.field];
+                if (relation.meta?.system) delete collection.relations[i];
+            });
 
             // Fields with primitive types
             Object.entries(collection.prevFields).forEach(([key, value]) => {
