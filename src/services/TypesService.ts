@@ -4,9 +4,7 @@ import { getTabSpaceCount } from '../utils/getTabSpaceCount';
 import { maybeAddTrailingSlash } from '../utils/maybeAddTrailingSlash';
 
 import type { EndpointExtensionContext } from '@directus/extensions';
-import type { FieldsService } from '@directus/api/dist/services';
 import type { Field, FieldOverview } from '@directus/types';
-declare type Services = typeof import('@directus/api/dist/services');
 
 type GetSchema = EndpointExtensionContext['getSchema'];
 type SCHEMA = Awaited<ReturnType<GetSchema>>;
@@ -186,13 +184,7 @@ const getRelations = (
 };
 
 export const generateTypes = async (
-    {
-        getSchema,
-        logger,
-        services,
-    }: Omit<EndpointExtensionContext, 'services'> & {
-        services: Services;
-    },
+    { getSchema, logger, services }: EndpointExtensionContext,
     options: GenerateTypesOptions,
 ) => {
     if (!getSchema || typeof getSchema !== 'function') {
@@ -200,7 +192,7 @@ export const generateTypes = async (
     }
     const schema = await getSchema();
 
-    const fieldsService: FieldsService = new services.FieldsService({
+    const fieldsService = new services.FieldsService({
         schema,
     });
 
