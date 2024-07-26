@@ -25,7 +25,7 @@ type COLLECTION = {
 export type GenerateTypesOptions = {
     spaces: number;
     useTabs: boolean;
-    trailingSemiColons: boolean;
+    trailingSemicolons: boolean;
 };
 
 const directusTypes = new Set();
@@ -233,14 +233,14 @@ export const generateTypes = async (
                 if (value.field === collection.primary) {
                     ret += `${maybeAddTrailingSlash(
                         ': PrimaryKey',
-                        options.trailingSemiColons,
+                        options.trailingSemicolons,
                     )}\n`;
                     return;
                 }
 
                 ret += maybeAddTrailingSlash(
                     `: ${getType(value)}`,
-                    options.trailingSemiColons,
+                    options.trailingSemicolons,
                 );
                 ret += '\n';
             });
@@ -256,14 +256,14 @@ export const generateTypes = async (
                         : field.field;
                 ret += maybeAddTrailingSlash(
                     `: ${getType(field)}`,
-                    options.trailingSemiColons,
+                    options.trailingSemicolons,
                 ); // TODO: Add ?: here for partials if needed
                 ret += '\n';
             });
 
             ret += `${maybeAddTrailingSlash(
                 '}',
-                options.trailingSemiColons,
+                options.trailingSemicolons,
             )}\n\n`;
         });
 
@@ -278,7 +278,7 @@ export const generateTypes = async (
         .sort()
         .join(', ')} } from '@directus/types'${maybeAddTrailingSlash(
         '',
-        options.trailingSemiColons,
+        options.trailingSemicolons,
     )}\n\n${ret}`;
 
     return ret;

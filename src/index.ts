@@ -12,7 +12,7 @@ export default defineEndpoint((router, { getSchema, logger }) => {
                 ? Math.floor(parseInt(req.query.spaces?.toString()))
                 : 2,
             useTabs: req.query.useTabs === 'true',
-            trailingSemiColons: req.query.trailingSemiColons === 'true',
+            trailingSemicolons: req.query.trailingSemicolons === 'true',
         };
         await generateTypes(getSchema, logger, options).then((text) =>
             res.send(text),
