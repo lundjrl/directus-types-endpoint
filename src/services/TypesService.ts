@@ -1,5 +1,7 @@
 import { toPascalCase } from '../utils/toPascalCase';
 import { toSingular } from '../utils/toSingular';
+import { getTabSpaceCount } from '../utils/getTabSpaceCount';
+import { maybeAddTrailingSlash } from '../utils/maybeAddTrailingSlash';
 
 import type { EndpointExtensionContext } from '@directus/extensions';
 
@@ -18,6 +20,12 @@ type COLLECTION = {
     accountability: S[keyof S]['accountability'];
     fields: S[keyof S]['fields'];
     prevFields: S[keyof S]['fields'];
+};
+
+export type GenerateTypesOptions = {
+    spaces: number;
+    useTabs: boolean;
+    trailingSemicolons: boolean;
 };
 
 const directusTypes = new Set();
@@ -172,7 +180,11 @@ const getRelations = (
     return col;
 };
 
-export const generateTypes = async (getSchema: GetSchema, logger: Logger) => {
+export const generateTypes = async (
+    getSchema: GetSchema,
+    logger: Logger,
+    options: GenerateTypesOptions,
+) => {
     if (!getSchema || typeof getSchema !== 'function') {
         return [];
     }
@@ -216,29 +228,43 @@ export const generateTypes = async (getSchema: GetSchema, logger: Logger) => {
 
             // Fields with primitive types
             Object.entries(collection.prevFields).forEach(([key, value]) => {
-                ret += '  ';
+                ret += getTabSpaceCount(options.spaces, options.useTabs);
                 ret += key.includes('-') || key.includes('_') ? `${key}` : key;
                 if (value.field === collection.primary) {
-                    ret += `: PrimaryKey\n`;
+                    ret += `${maybeAddTrailingSlash(
+                        ': PrimaryKey',
+                        options.trailingSemicolons,
+                    )}\n`;
                     return;
                 }
 
-                ret += `: ${getType(value)}\n`;
+                ret += maybeAddTrailingSlash(
+                    `: ${getType(value)}`,
+                    options.trailingSemicolons,
+                );
+                ret += '\n';
             });
 
             // TODO: Make sure to handle partial fields on a type.
 
             // Related fields - fields with relations
             collection.relations.forEach((field) => {
-                ret += '  ';
+                ret += getTabSpaceCount(options.spaces, options.useTabs);
                 ret +=
                     field.field.includes('-') || field.field.includes('_')
                         ? `${field.field}`
                         : field.field;
-                ret += `: ${getType(field)}\n`; // TODO: Add ?: here for partials if needed
+                ret += maybeAddTrailingSlash(
+                    `: ${getType(field)}`,
+                    options.trailingSemicolons,
+                ); // TODO: Add ?: here for partials if needed
+                ret += '\n';
             });
 
-            ret += '}\n\n';
+            ret += `${maybeAddTrailingSlash(
+                '}',
+                options.trailingSemicolons,
+            )}\n\n`;
         });
 
     ret +=
@@ -250,7 +276,10 @@ export const generateTypes = async (getSchema: GetSchema, logger: Logger) => {
 
     ret = `import { ${Array.from(directusTypes)
         .sort()
-        .join(', ')} } from '@directus/types'\n\n${ret}`;
+        .join(', ')} } from '@directus/types'${maybeAddTrailingSlash(
+        '',
+        options.trailingSemicolons,
+    )}\n\n${ret}`;
 
     return ret;
 };
