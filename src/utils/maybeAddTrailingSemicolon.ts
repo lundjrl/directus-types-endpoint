@@ -1,7 +1,7 @@
 export const maybeAddTrailingSemicolon = (
     str: string,
-    addTrailingSlash = false,
+    addTrailingSemicolon = false,
 ) => {
-    if (!addTrailingSlash) return str;
+    if (!addTrailingSemicolon) return str;
     return `${str};`;
 };

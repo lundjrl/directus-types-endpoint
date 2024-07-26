@@ -297,14 +297,14 @@ export const generateTypes = async (
                 ret += getTabSpaceCount(options.spaces, options.useTabs);
                 ret += key.includes('-') || key.includes('_') ? `${key}` : key;
                 if (value.field === collection.primary) {
-                    ret += `${maybeAddTrailingSlash(
+                    ret += `${maybeAddTrailingSemicolon(
                         ': PrimaryKey',
                         options.trailingSemicolons,
                     )}\n`;
                     return;
                 }
 
-                ret += maybeAddTrailingSlash(
+                ret += maybeAddTrailingSemicolon(
                     `: ${getType(value)}`,
                     options.trailingSemicolons,
                 );
@@ -320,14 +320,14 @@ export const generateTypes = async (
                     field.field.includes('-') || field.field.includes('_')
                         ? `${field.field}`
                         : field.field;
-                ret += maybeAddTrailingSlash(
+                ret += maybeAddTrailingSemicolon(
                     `: ${getType(field)}`,
                     options.trailingSemicolons,
                 ); // TODO: Add ?: here for partials if needed
                 ret += '\n';
             });
 
-            ret += `${maybeAddTrailingSlash(
+            ret += `${maybeAddTrailingSemicolon(
                 '}',
                 options.trailingSemicolons,
             )}\n\n`;
@@ -342,7 +342,7 @@ export const generateTypes = async (
 
     ret = `import { ${Array.from(directusTypes)
         .sort()
-        .join(', ')} } from '@directus/types'${maybeAddTrailingSlash(
+        .join(', ')} } from '@directus/types'${maybeAddTrailingSemicolon(
         '',
         options.trailingSemicolons,
     )}\n\n${ret}`;
