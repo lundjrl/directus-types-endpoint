@@ -2,7 +2,7 @@ import { defineEndpoint } from '@directus/extensions-sdk';
 import { generateTypes } from './services/TypesService';
 import type { GenerateTypesOptions } from './services/TypesService';
 
-export default defineEndpoint((router, { getSchema, logger }) => {
+export default defineEndpoint((router, context) => {
     router.get('/', async (req, res) => {
         try {
             res.type('text/plain');
@@ -15,11 +15,11 @@ export default defineEndpoint((router, { getSchema, logger }) => {
                 useTabs: req.query.useTabs === 'true',
                 trailingSemicolons: req.query.trailingSemicolons === 'true',
             };
-            await generateTypes(getSchema, logger, options).then((text) =>
+            await generateTypes(context, options).then((text) =>
                 res.send(text),
             );
         } catch (error) {
-            logger.error(error);
+            context.logger.error(error);
             res.status(500);
             if (error instanceof Error) {
                 res.send(error.message);
