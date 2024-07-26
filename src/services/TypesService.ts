@@ -251,9 +251,12 @@ export const generateTypes = async (
                     'Directus'.length,
                 )}`;
                 types.push(
-                    `${customDirectusCollectionName}: ${customDirectusTypeName}${
-                        isSingleton ? '' : '[]'
-                    }`,
+                    maybeAddTrailingSlash(
+                        `${customDirectusCollectionName}: ${customDirectusTypeName}${
+                            isSingleton ? '' : '[]'
+                        }`,
+                        options.trailingSemicolons,
+                    ),
                 );
                 ret += `export type ${customDirectusTypeName} = ${typeName} & {\n`;
 
@@ -272,7 +275,12 @@ export const generateTypes = async (
                 });
             } else {
                 types.push(
-                    `${collectionName}: ${typeName}${isSingleton ? '' : '[]'}`,
+                    maybeAddTrailingSlash(
+                        `${collectionName}: ${typeName}${
+                            isSingleton ? '' : '[]'
+                        }`,
+                        options.trailingSemicolons,
+                    ),
                 );
                 ret += `export type ${typeName} = {\n`;
             }
