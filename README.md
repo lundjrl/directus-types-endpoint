@@ -39,9 +39,13 @@ pnpm add directus-extension-types
 ### Getting types
 
 After installation, the extension should be good to go.
-To get your types, you'll need to ping the `/types` endpoint of your application.
+To get your types, you'll need to make an HTTP GET request to the `/types` endpoint of your application.
 
-Ex: `http://localhost:8055/types`
+Examples: 
+- Default configuration: `http://localhost:8055/types`
+- Set spaces as 4 and use trailing semicolons: `http://localhost:8055/types?spaces=4&trailingSemicolons=true`
+- Use tabs instead of spaces: `http://localhost:8055/types?spaces=1&useTabs=true`
+
 
 ### Using types
 
