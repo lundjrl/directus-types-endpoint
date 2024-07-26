@@ -1,7 +1,7 @@
 import { toPascalCase } from '../utils/toPascalCase';
 import { toSingular } from '../utils/toSingular';
 import { getTabSpaceCount } from '../utils/getTabSpaceCount';
-import { maybeAddTrailingSlash } from '../utils/maybeAddTrailingSlash';
+import { maybeAddTrailingSemicolon } from '../utils/maybeAddTrailingSemicolon';
 
 import type { EndpointExtensionContext } from '@directus/extensions';
 import type { Field, FieldOverview } from '@directus/types';
@@ -251,7 +251,7 @@ export const generateTypes = async (
                     'Directus'.length,
                 )}`;
                 types.push(
-                    maybeAddTrailingSlash(
+                    maybeAddTrailingSemicolon(
                         `${customDirectusCollectionName}: ${customDirectusTypeName}${
                             isSingleton ? '' : '[]'
                         }`,
@@ -275,7 +275,7 @@ export const generateTypes = async (
                 });
             } else {
                 types.push(
-                    maybeAddTrailingSlash(
+                    maybeAddTrailingSemicolon(
                         `${collectionName}: ${typeName}${
                             isSingleton ? '' : '[]'
                         }`,

@@ -1,4 +1,4 @@
-export const maybeAddTrailingSlash = (
+export const maybeAddTrailingSemicolon = (
     str: string,
     addTrailingSlash = false,
 ) => {
